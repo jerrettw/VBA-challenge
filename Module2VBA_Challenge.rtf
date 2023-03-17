@@ -1,0 +1,116 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Sub CalculateYearlyAndPercentChange()\
+\
+    ' Declare variables to store the data\
+    Dim lastRow As Long\
+    Dim currentTicker As String\
+    Dim openingPrice As Double\
+    Dim closingPrice As Double\
+    Dim yearlyChange As Double\
+    Dim percentChange As Double\
+    Dim totalVolume As Double\
+    Dim outputRow As Long\
+    \
+    ' Get the last row of data in the worksheet\
+    lastRow = ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row\
+    \
+    ' Set the first output row to row 2\
+    outputRow = 2\
+    \
+    ' Add headlines to output columns\
+    Cells(1, 9).Value = "Ticker"\
+    Cells(1, 10).Value = "Yearly Change"\
+    Cells(1, 11).Value = "Percent Change"\
+    Cells(1, 12).Value = "Total Stock Volume"\
+    \
+    ' Loop through each row of data\
+    For i = 2 To lastRow\
+        \
+        ' Check if the ticker has changed\
+        If Cells(i, 1).Value <> currentTicker Then\
+            ' If the ticker has changed, set the opening price and reset the total volume\
+            currentTicker = Cells(i, 1).Value\
+            openingPrice = Cells(i, 3).Value\
+            totalVolume = 0\
+        End If\
+        \
+        ' Add the volume for the current row to the total volume\
+        totalVolume = totalVolume + Cells(i, 7).Value\
+        \
+        ' If this is the last row for the current ticker, calculate the yearly and percent change and output the results\
+        If Cells(i, 1).Value <> Cells(i + 1, 1).Value Then\
+            closingPrice = Cells(i, 6).Value\
+            yearlyChange = closingPrice - openingPrice\
+            percentChange = yearlyChange / openingPrice\
+            Cells(outputRow, 9).Value = currentTicker ' Ticker symbol in column I\
+            Cells(outputRow, 10).Value = yearlyChange ' Yearly change in column J\
+            Cells(outputRow, 11).Value = percentChange ' Percent change in column K\
+            Cells(outputRow, 12).Value = totalVolume ' Total volume in column L\
+            \
+            ' Format the Yearly Change column with green for positive values and red for negative values\
+            If yearlyChange > 0 Then\
+                Cells(outputRow, 10).Interior.ColorIndex = 4 ' Green\
+            ElseIf yearlyChange < 0 Then\
+                Cells(outputRow, 10).Interior.ColorIndex = 3 ' Red\
+            End If\
+            \
+            ' Format the Percent Change column as a percentage\
+            Cells(outputRow, 11).NumberFormat = "0.00%" ' Percentage format\
+            \
+            outputRow = outputRow + 1 ' Move to the next output row\
+        End If\
+        \
+    Next i ' Move to the next row of data\
+    \
+End Sub\
+\
+Sub FindMinMaxAndMaxValues()\
+    'Loop through all sheets\
+    For Each ws In Worksheets\
+        'Set variables to keep track of max and min values\
+        Dim maxPercentChange As Double\
+        Dim minPercentChange As Double\
+        Dim maxVolume As Double\
+        Dim maxPercentChangeTicker As String\
+        Dim minPercentChangeTicker As String\
+        Dim maxVolumeTicker As String\
+        'Set initial values for max and min variables\
+        maxPercentChange = -1000000\
+        minPercentChange = 1000000\
+        maxVolume = 0\
+        'Loop through rows to find max and min values\
+        For i = 2 To ws.Cells(Rows.Count, 1).End(xlUp).Row\
+            'Find max percent change\
+            If ws.Cells(i, 11).Value > maxPercentChange Then\
+                maxPercentChange = ws.Cells(i, 11).Value\
+                maxPercentChangeTicker = ws.Cells(i, 9).Value\
+            End If\
+            'Find min percent change\
+            If ws.Cells(i, 11).Value < minPercentChange Then\
+                minPercentChange = ws.Cells(i, 11).Value\
+                minPercentChangeTicker = ws.Cells(i, 9).Value\
+            End If\
+            'Find max volume\
+            If ws.Cells(i, 12).Value > maxVolume Then\
+                maxVolume = ws.Cells(i, 12).Value\
+                maxVolumeTicker = ws.Cells(i, 9).Value\
+            End If\
+        Next i\
+        'Output results to summary table\
+        ws.Range("P2").Value = maxPercentChangeTicker\
+        ws.Range("P3").Value = minPercentChangeTicker\
+        ws.Range("P4").Value = maxVolumeTicker\
+        ws.Range("Q2").Value = maxPercentChange\
+        ws.Range("Q3").Value = minPercentChange\
+        ws.Range("Q4").Value = maxVolume\
+    Next ws\
+End Sub\
+\
+\
+}
